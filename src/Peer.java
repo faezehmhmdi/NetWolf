@@ -7,6 +7,10 @@ import java.util.Map;
 
 import static java.lang.Thread.sleep;
 
+/**
+ * Class Peer includes Receiving requests and sharing files.
+ */
+
 public class Peer {
     DatagramSocket socket;
     final HashMap<String, String> discoveredPeers = new HashMap<>(); // map from name -> ip:port
@@ -55,7 +59,7 @@ public class Peer {
                                 if (!nodes[i].equals(this.name)) { // if this is not us
                                     synchronized (this.discoveredPeers) {
                                         if (!this.discoveredPeers.containsKey(nodes[i])) {
-                                            System.out.println(this.name + " Found " + nodes[i] + " " + nodes[i + 1]);
+//                                            System.out.println(this.name + " Found " + nodes[i] + " " + nodes[i + 1]);
                                             addNeighbour(nodes[i], nodes[i + 1]);
                                         }
                                     }
@@ -66,7 +70,7 @@ public class Peer {
                             for (File file : this.fileList) {
                                 final var fileName = content.trim();
                                 if (fileName.equals(file.getName())) {
-                                    System.out.println(this.name + " has " + fileName);
+//                                    System.out.println(this.name + " has " + fileName);
                                     int tcpPort = serverSock(file.getPath());
                                     // respond to requester
                                     byte[] resBuff = ("Response " + fileName + " " + tcpPort).getBytes();
@@ -145,10 +149,10 @@ public class Peer {
                         bos.write(contents, 0, bytesRead);
                     bos.flush();
                     socket.close();
-                    System.out.println("File saved successfully!");
+                    System.out.println("File Received.");
                     updateFileList();
                 } else {
-                    System.out.println("No One has The File " + filename);
+                    System.out.println(filename + " not found.");
                 }
             } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
@@ -190,13 +194,13 @@ public class Peer {
                     chunkRead = bis.read(contents);
                     os.write(contents, 0, chunkRead);
                     current += chunkRead;
-                    System.out.print("Sending file ... " + (current * 100) / fileLength + "% complete!");
+                    System.out.println("Sending file ... " + (current * 100) / fileLength + " % ");
                 }
                 os.flush();
                 //File transfer done. Close the socket connection!
                 socket.close();
                 serverSocket.close();
-                System.out.println("File sent successfully!");
+//                System.out.println("File sent successfully!");
             } catch (SocketTimeoutException e) {
                 return;
             } catch (IOException e) {
@@ -204,14 +208,10 @@ public class Peer {
             }
         });
         senderThread.start();
-        System.out.println(this.name + " Server Port " + serverSocket.getLocalPort());
+//        System.out.println(this.name + " Server Port " + serverSocket.getLocalPort());
         return serverSocket.getLocalPort();
     }
 
-
-    public String getName() {
-        return name;
-    }
 
     public void addNeighbour(String name, String host) {
         discoveredPeers.put(name.trim(), host.trim());
